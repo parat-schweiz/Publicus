@@ -58,7 +58,7 @@ function showPostalAddressEditDialog(method, id){
   </div>
   <div class="card-body">
     <table class="table table-hover table-fixed">
-      <tbody class="person-master-card">
+      <tbody class="contact-master-card">
         @Each.List
         <tr class="clickable-row">
           <td width="80%" id="postalAddressRowEdit@Current.Id" class="@Model.Editable">@Current.Text</td>
