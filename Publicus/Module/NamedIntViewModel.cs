@@ -99,5 +99,10 @@ namespace Publicus
         : this((int)mode, mode.Translate(translator), selected)
         {
         }
+
+        public NamedIntViewModel(Translator translator, ContactColumns columns, bool selected)
+        : this((int)columns, columns.TranslateFlag(translator), selected)
+        {
+        }
     }
 }

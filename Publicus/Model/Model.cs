@@ -41,6 +41,7 @@ namespace Publicus
             database.CreateTable<Phrase>();
             database.CreateTable<PhraseTranslation>();
             database.CreateTable<SystemWideSettings>();
+            database.CreateTable<SearchSettings>();
         }
 
         private static void Migrate(IDatabase database)

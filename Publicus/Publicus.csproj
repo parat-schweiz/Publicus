@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{0F367296-D297-46AA-ACCD-D89F22525906}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Quaestur</RootNamespace>
+    <RootNamespace>Publicus</RootNamespace>
     <AssemblyName>Publicus</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
   </PropertyGroup>
@@ -208,6 +208,7 @@
     <Compile Include="Infrastructure\SecurityThrottle.cs" />
     <Compile Include="Model\User.cs" />
     <Compile Include="Model\MasterRole.cs" />
+    <Compile Include="Model\SearchSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -728,6 +729,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="View\mailingscheduled.sshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\waitdialog.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

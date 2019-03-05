@@ -2,173 +2,140 @@
 
 @Section['script']
 <script>
-  var itemsPerPage = 10;
-  var currentPage = 0;
-  var ShowOrganization = true;
-  var ShowName = true;
-  var ShowStreet = true;
-  var ShowPlace = true;
-  var ShowState = false;
-  var ShowMail = false;
-  var ShowPhone = false;
-  function setItemsPerPage(n){
-      itemsPerPage = n;
-      currentPage = 0;
-      updatecontactlist();
+  var searchSettings = null;
+  var settingsList = null;
+  var getting = false;
+  function listSettings(callback){
+    $.get("/contact/list/settings/list", function(resultData){
+      if (resultData){
+        settingsList = JSON.parse(resultData);
+        if (callback) callback(true);
+      }else{
+        if (callback) callback(false);
+      }
+    });
   }
-  function setCurrentPage(n){
-      currentPage = n;
-      updatecontactlist();
+  function getSettings(id, callback){
+    $.get("/contact/list/settings/get/" + id, function(resultData){
+      if (resultData){
+        searchSettings = JSON.parse(resultData);
+        getting = true;
+        $("#filtertext").val(searchSettings.FilterText);
+        $("#filterSubscription").val(searchSettings.FilterSubscriptionId);
+        $("#filterTag").val(searchSettings.FilterTagId);
+        $("#columns").val(searchSettings.Columns);
+        $("#itemsPerPage").val(searchSettings.ItemsPerPage);
+        $("#currentPage").val(searchSettings.CurrentPage);
+        $("#filterSubscription").change();
+        $("#filterTag").change();
+        $("#columns").change();
+        getting = false;
+        if (callback) callback(true);
+      }else{
+        if (callback) callback(false);
+      }
+    });
   }
-  function toggleShowOrganization(){
-    ShowOrganization = !ShowOrganization;
-    if (ShowOrganization){
-        $("#menuShowOrganization").addClass('active');
-    }else{
-        $("#menuShowOrganization").removeClass('active');
-    }
-    updatecontactlist()
+  function setSettings(callback){
+    searchSettings.FilterText = $("#filtertext").val();
+    searchSettings.FilterSubscriptionId = $("#filterSubscription").val();
+    searchSettings.FilterTagId = $("#filterTag").val();
+    searchSettings.Columns = $("#columns").val();
+    searchSettings.ItemsPerPage = $("#itemsPerPage").val();
+    searchSettings.CurrentPage = $("#currentPage").val();
+    $.post("/contact/list/settings/set/" + searchSettings.Id, JSON.stringify(searchSettings), function(resultData){
+      if (callback) callback();
+    });
   }
-  function toggleShowName(){
-    ShowName = !ShowName;
-    if (ShowName){
-        $("#menuShowName").addClass('active');
-    }else{
-        $("#menuShowName").removeClass('active');
-    }
-    updatecontactlist()
-  }
-  function toggleShowStreet(){
-    ShowStreet = !ShowStreet;
-    if (ShowStreet){
-        $("#menuShowStreet").addClass('active');
-    }else{
-        $("#menuShowStreet").removeClass('active');
-    }
-    updatecontactlist()
-  }
-  function toggleShowPlace(){
-    ShowPlace = !ShowPlace;
-    if (ShowPlace){
-        $("#menuShowPlace").addClass('active');
-    }else{
-        $("#menuShowPlace").removeClass('active');
-    }
-    updatecontactlist()
-  }
-  function toggleShowState(){
-    ShowState = !ShowState;
-    if (ShowState){
-        $("#menuShowState").addClass('active');
-    }else{
-        $("#menuShowState").removeClass('active');
-    }
-    updatecontactlist()
-  }
-  function toggleShowMail(){
-    ShowMail = !ShowMail;
-    if (ShowMail){
-        $("#menuShowMail").addClass('active');
-    }else{
-        $("#menuShowMail").removeClass('active');
-    }
-    updatecontactlist()
-  }
-  function toggleShowPhone(){
-    ShowPhone = !ShowPhone;
-    if (ShowPhone){
-        $("#menuShowPhone").addClass('active');
-    }else{
-        $("#menuShowPhone").removeClass('active');
-    }
-    updatecontactlist()
-  }
-  function updatecontactlist(){
-      searchSettings = new Object();
-      searchSettings.FilterText = $("#filtertext")[0].value
-      searchSettings.ItemsPerPage = itemsPerPage;
-      searchSettings.CurrentPage = currentPage;
-      searchSettings.ShowOrganization = ShowOrganization;
-      searchSettings.ShowName = ShowName;
-      searchSettings.ShowStreet = ShowStreet;
-      searchSettings.ShowPlace = ShowPlace;
-      searchSettings.ShowState = ShowState;
-      searchSettings.ShowMail = ShowMail;
-      searchSettings.ShowPhone = ShowPhone;
-      $.post("/contact/list/data", JSON.stringify(searchSettings), function(contactListData, status){
-          if (contactListData){
-              $("#contactlist").html(contactListData);
-          }
+  function set(){
+    if (!getting){
+      waitingDialog.show(undefined, undefined, function(){
+        setSettings(function(){
+          updateContactList(function(success){
+            if (success){
+              waitingDialog.hide();
+            }else{
+              waitingDialog.hide();
+            }
+          });
+        });
       });
-      $.post("/contact/list/pages", JSON.stringify(searchSettings), function(contactPagesData, status){
-          if (contactPagesData){
-              $("#contactpages").html(contactPagesData);
-          }
-      });
+    }
   }
   $(document).ready(function(){
-      if (ShowOrganization){
-        $("#menuShowOrganization").addClass('active');
-      }
-      if (ShowName){
-        $("#menuShowName").addClass('active');
-      }
-      if (ShowStreet){
-        $("#menuShowStreet").addClass('active');
-      }
-      if (ShowPlace){
-        $("#menuShowPlace").addClass('active');
-      }
-      if (ShowState){
-        $("#menuShowState").addClass('active');
-      }
-      if (ShowMail){
-        $("#menuShowMail").addClass('active');
-      }
-      if (ShowPhone){
-        $("#menuShowPhone").addClass('active');
-      }
-      $("#filtertext").keypress(function (e) {
-          if(e.which == 13) {
-              updatecontactlist();
-              e.preventDefault();
-              return false;
-          }
+    $('.selectpicker').selectpicker();
+    $("#filtertext").on('input', set);
+    $("#filterSubscription").change(set);
+    $("#columns").change(set);
+    $("#filterTag").change(set);
+    waitingDialog.show(undefined, undefined, function(){
+      listSettings(function(success){
+        if (success){
+          getSettings(settingsList[0].Id, function(success){
+            if (success){
+              updateContactList(function(success){
+                if (success){
+                  waitingDialog.hide();
+                }else{
+                  waitingDialog.hide();
+                }
+              });
+            }else{
+              waitingDialog.hide();
+            }
+          });
+        }else{
+          waitingDialog.hide();
+        }
       });
-      $("#filtersubmit").click(function(event) {
-        updatecontactlist();
-        event.preventDefault();  
-      });
-      updatecontactlist();
+    });
   });
-</script>
+  function updateContactList(callback){
+    $.get("/contact/list/pages/" + searchSettings.Id, function(contactPagesData, status){
+      if (contactPagesData){
+        $(".contactpage").remove();
+        $("#contactListNavBar").append(contactPagesData);
+        activatePages();
+        $.get("/contact/list/data/" + searchSettings.Id, function(contactListData, status){
+          if (contactListData){
+            $("#contactlist").html(contactListData);
+            if (callback) callback(true);
+          }else{
+            if (callback) callback(false);
+          }
+        });
+      }else{
+        if (callback) callback(false);
+      }
+    });
+  }
+  </script>
 @EndSection
     
 @Section['input']
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <form class="form-inline">
-    <input class="form-control mr-sm-2" type="text" placeholder="@Model.PhraseSearch" aria-label="@Model.PhraseShowSearch" id="filtertext"/>
-    <input class="btn btn-primary" id="filtersubmit" type="submit" value="@Model.PhraseFilter"/>
+    <input class="form-control mr-sm-2 navbar-field-margin" type="text" placeholder="@Model.PhraseSearch" aria-label="@Model.PhraseShowSearch" id="filtertext"/>
   </form>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#contactListNavBar" aria-controls="contactListNavBar" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="contactListNavBar">
-    <ul class="nav navbar-nav">
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">@Model.PhraseShowColumns <span class="caret"></span></a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <a id="menuShowOrganization" class="dropdown-item" onclick="toggleShowOrganization()" href="javascript:void(0);">@Model.PhraseShowOrganization</a>
-          <a id="menuShowName" class="dropdown-item" onclick="toggleShowName()" href="javascript:void(0);">@Model.PhraseShowName</a>
-          <a id="menuShowStreet" class="dropdown-item" onclick="toggleShowStreet()" href="javascript:void(0);">@Model.PhraseShowStreet</a>
-          <a id="menuShowPlace" class="dropdown-item" onclick="toggleShowPlace()" href="javascript:void(0);">@Model.PhraseShowPlace</a>
-          <a id="menuShowState" class="dropdown-item" onclick="toggleShowState()" href="javascript:void(0);">@Model.PhraseShowState</a>
-          <a id="menuShowMail" class="dropdown-item" onclick="toggleShowMail()" href="javascript:void(0);">@Model.PhraseShowMail</a>
-          <a id="menuShowPhone" class="dropdown-item" onclick="toggleShowPhone()" href="javascript:void(0);">@Model.PhraseShowPhone</a>
-        </div>
-      </li>
-    </ul>
-    <ul class="nav navbar-nav ml-auto" id="contactpages"/>
+    <select id="filterSubscription" class="selectpicker form-control mr-sm-2" data-live-search="true">
+      @Each.Subscriptions
+      <option value="@Current.Id" @Current.Options>@Current.Name</option>
+      @EndEach
+    </select>
+    <select id="filterTag" class="selectpicker form-control mr-sm-2" data-live-search="true">
+      @Each.Tags
+      <option value="@Current.Id" @Current.Options>@Current.Name</option>
+      @EndEach
+    </select>
+    <select id="columns" class="selectpicker form-control mr-sm-2" data-live-search="true" multiple>
+      @Each.Columns
+      <option value="@Current.Value" @Current.Options>@Current.Name</option>
+      @EndEach
+    </select>
   </div>
 </nav>
 @EndSection

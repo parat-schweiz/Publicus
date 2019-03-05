@@ -28,6 +28,12 @@
       @If.ShowPhone
       <th>@Model.PhraseHeaderPhone</th>
       @EndIf
+      @If.ShowSubscriptions
+      <th>@Model.PhraseHeaderSubscriptions</th>
+      @EndIf
+      @If.ShowTags
+      <th>@Model.PhraseHeaderTags</th>
+      @EndIf
     </tr>
   </thead>
   <tbody>
@@ -54,6 +60,12 @@
       @EndIf
       @If.ShowPhone
       <td>@Current.PhoneNumber</td>
+      @EndIf
+      @If.ShowSubscriptions
+      <td>@Current.Subscriptions</td>
+      @EndIf
+      @If.ShowTags
+      <td>@Current.Tags</td>
       @EndIf
     </tr>
     @EndEach

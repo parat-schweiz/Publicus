@@ -177,6 +177,26 @@ namespace Publicus
             }
         }
 
+        public string SortName
+        {
+            get
+            {
+                var name = Organization.Value;
+
+                if (LastName.Value.Length > 0)
+                {
+                    name += ", " + LastName.Value;
+
+                    if (ShortFirstNames.Length > 0)
+                    {
+                        name += ", " + ShortFirstNames;
+                    }
+                }
+
+                return name;
+            }
+        }
+
         public override string ToString()
         {
             return "Contact " + ShortHand;
